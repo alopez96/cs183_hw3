@@ -4,15 +4,139 @@
 <script src="{{=URL('static', 'js/vue.js')}}"></script>
 <script>
     var my_url = "{{=URL('api', 'my_method')}}";
+    var memos_url = "{{=URL('api', 'get_memos')}}";
+    var add_memo_url = "{{=URL('api', 'add_memo', user_signature=True)}}";
+    var del_memo_url = "{{=URL('api', 'del_memo', user_signature=True)}}";
+    var toggle_public_url = "{{=URL('api', 'toggle_public', user_signature=True)}}";
+    var edit_memo_url = "{{=URL('api', 'edit_memo', user_signature=True)}}";
 </script>
 {{end}}
+
 
 <div class="main_content">
 
     <div id="vue-div" class="display:none">
         <!-- Your code goes here.  Remember to call $("#vue-div").show() once you get the data for the first time. -->
+
+
+        <div v-if="logged_in">
+        <div>
+            <div v-if="!is_editing" v-on:click="edit_toggle(true)">${my_string}</div>
+            <div v-if="is_editing">
+                <input v-model="my_string" placeholder="your string"/>
+                <button class="btn rounded" v-on:click="edit_toggle(false)">Save</button>
+            </div>
+        </div>
+
+
+
+
+        <!-- Buttons -->
+        <button v-if="!is_adding_memo" class="btn"
+              v-on:click="add_memo_button()"
+              :disabled="!logged_in"
+              v-bind:class="{'disabled': !logged_in}">
+        <i class="fa fa-plus"></i> Add memo
+      </button>
+      <button v-else="is_adding_memo" class="btn" v-on:click="add_memo_button()">
+        <i class="fa fa-times"></i> Close
+      </button>
+
+
+
+
+
+        <!-- Form to add memos -->
+    <div v-if="is_adding_memo">
+      <form action="#" v-on:submit.prevent="add_memo" class="form-horizontal" enctype="multipart/form-data" method="post">
+        <div class="form-group" id="no_table_artist__row">
+          <div>
+            <input class="form-control string" id="no_table_artist" v-model="form_title"  placeholder="Title" type="text" />
+            <span class="help-block"></span>
+          </div>
+        </div>
+          <div class="form-group" id="no_table_album__row">
+          <div><input class="form-control string" id="no_table_album" name="album" type="text" v-model="form_memo" placeholder="Album"/>
+            <span class="help-block"></span>
+          </div>
+        </div>
+          <div class="form-group" id="submit_record__row">
+          <div>
+            <input class="btn btn-primary" id="add_memo_submit" type="submit" value="Submit" />
+          </div>
+          </div>
+      </form>
     </div>
 
+
+
+
+
+
+
+      <div v-for="memo in memos" class="memo">
+        <div class="memo_text">
+          <div class="memo_title">${memo.title}</div>
+          <div class="memo_content">${memo.memo}</div>
+        </div>
+          <div class="button_list">
+            <div class="buttons">
+                <i>index: ${memo._idx + 1}</i>
+                <i class="btn fa fa-trash" v-on:click="delete_memo(memo._idx)"></i>
+                <i v-if="memo.is_public" v-on:click="public_toggle(memo._idx)" class="btn fa fa-users"></i>
+                <i v-if="!memo.is_public" v-on:click="public_toggle(memo._idx)" class="btn fa fa-user"></i>
+                <i class="btn fa fa-edit"></i>
+                <!--<i>public: ${memo.is_public}</i>-->
+
+            </div>
+          </div>
+      </div>
+
+
+        </div>
+        <!--end of logged in page-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!--logged out page-->
+        <div v-if="!logged_in">
+
+            <h1 class="main_title">Welcome!</h1>
+
+            <p class="explanation">This site will help you organize your life by storing your checklists.
+                Please log in to use it.</p>
+
+            <div class="login_button">
+                <a href="{{=URL('default', 'user')}}" class="btn">Login</a>
+            </div>
+
+            <p>This is the list of public memos.</p>
+            <div v-for="memo in memos">
+                <div v-if="memo.is_public" class="memo">
+                    <div class="memo_text">
+                        <div class="memo_title">${memo.title}</div>
+                        <div>${memo.memo}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
 </div>
 
 <script src="{{=URL('static', 'js/default_index.js')}}"></script>
